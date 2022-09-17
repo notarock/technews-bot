@@ -3,7 +3,6 @@ package discord
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -50,14 +49,13 @@ func Init(config DiscordConfig) (DiscordClient, error) {
 
 	// // Open a websocket connection to Discord and begin listening.
 }
-func (dc DiscordClient) Do() error {
+func (dc DiscordClient) Wait() error {
 	err := dc.client.Open()
 	if err != nil {
 		return fmt.Errorf("error opening connection: %v", err)
 	}
 
 	// Wait here until CTRL-C or other term signal is received.
-	log.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
@@ -76,4 +74,8 @@ func healthcheckHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == "!ping" {
 		s.ChannelMessageSend(m.ChannelID, "Pong!")
 	}
+}
+
+func (dc DiscordClient) SendMessage(msg string) {
+	dc.client.ChannelMessageSend("lol-nope", msg)
 }
