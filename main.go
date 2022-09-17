@@ -12,7 +12,8 @@ import (
 
 func main() {
 	discord, err := discord.Init(discord.DiscordConfig{
-		Token: os.Getenv("DISCORD_TOKEN"),
+		Token:   os.Getenv("DISCORD_TOKEN"),
+		Channel: os.Getenv("DISCORD_CHANNEL"),
 	})
 
 	if err != nil {

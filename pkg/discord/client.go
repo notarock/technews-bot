@@ -1,8 +1,8 @@
 package discord
 
 import (
-	"flag"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,23 +12,14 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// Variables used for command line parameters
-var (
-	Token string
-)
-
-func init() {
-
-	flag.StringVar(&Token, "t", "", "Bot Token")
-	flag.Parse()
-}
-
 type DiscordConfig struct {
-	Token string
+	Token   string
+	Channel string
 }
 
 type DiscordClient struct {
-	client *discordgo.Session
+	client  *discordgo.Session
+	channel string
 }
 
 func Init(config DiscordConfig) (DiscordClient, error) {
@@ -45,7 +36,10 @@ func Init(config DiscordConfig) (DiscordClient, error) {
 	// In this example, we only care about receiving message events.
 	dg.Identify.Intents = discordgo.IntentsGuildMessages
 
-	return DiscordClient{client: dg}, nil
+	return DiscordClient{
+		client:  dg,
+		channel: config.Channel,
+	}, nil
 
 	// // Open a websocket connection to Discord and begin listening.
 }
@@ -76,6 +70,24 @@ func healthcheckHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func (dc DiscordClient) SendMessage(msg string) {
-	dc.client.ChannelMessageSend("lol-nope", msg)
+type Article struct {
+	Title   string
+	Link    string
+	Summary string
+	Author  string
+}
+
+func (dc DiscordClient) SendArticle(a Article) {
+	log.Println("Attempting to send article named ", a)
+
+	dc.client.ChannelMessageSendEmbed(dc.channel, &discordgo.MessageEmbed{
+		URL:         a.Link,
+		Type:        "link",
+		Title:       a.Title,
+		Description: a.Summary,
+		Timestamp:   "",
+		Color:       0,
+		Author:      &discordgo.MessageEmbedAuthor{URL: fmt.Sprintf("https://news.ycombinator.com/user?id=%s", a.Author), Name: a.Author, IconURL: "https://news.ycombinator.com/y18.gif"},
+		Fields:      []*discordgo.MessageEmbedField{},
+	})
 }
