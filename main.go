@@ -26,5 +26,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	b.Server()
+	b.Serve()
 }

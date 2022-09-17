@@ -30,7 +30,7 @@ func Init(config BotConfig) (Bot, error) {
 	}, nil
 }
 
-func (b Bot) Server() {
+func (b Bot) Serve() {
 	ticker := time.NewTicker(5 * time.Minute)
 	done := make(chan bool)
 
