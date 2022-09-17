@@ -11,10 +11,16 @@ import (
 )
 
 func main() {
-	discord, err := discord.Init(discord.DiscordConfig{
+	discordConfig := discord.DiscordConfig{
 		Token:   os.Getenv("DISCORD_TOKEN"),
 		Channel: os.Getenv("DISCORD_CHANNEL"),
-	})
+	}
+
+	if discordConfig.Channel == "" || discordConfig.Token == "" {
+		log.Fatalln("Cant run: bad config")
+	}
+
+	discord, err := discord.Init(discordConfig)
 
 	if err != nil {
 		log.Fatal(err)
