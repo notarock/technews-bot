@@ -6,21 +6,17 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/notarock/technews-bot/pkg/articles"
 )
 
 const (
 	LOBSTER_URL    = "https://lobste.rs"
 	TAGS_SEPARATOR = ","
+	SOURCE_NAME    = "LOBSTERS"
 )
 
-type LobsterArticle struct {
-	Title string
-	Link  string
-	Tags  []string
-}
-
-func FetchLatest() []LobsterArticle {
-	var articles []LobsterArticle
+func FetchLatestArticles() []articles.Article {
+	var lobsterArticles []articles.Article
 
 	res, err := http.Get(LOBSTER_URL)
 	if err != nil {
@@ -41,18 +37,23 @@ func FetchLatest() []LobsterArticle {
 
 		var taglist []string
 
-		if tags, ok := ul.Find(".tag").Attr("href"); !ok {
+		if tags, ok := s.Find(".tag").Attr("title"); ok {
 			taglist = strings.Split(tags, TAGS_SEPARATOR)
 		}
 
-		article := LobsterArticle{
-			Title: title,
-			Link:  link,
-			Tags:  taglist,
+		author := s.Find(".u-author").Text()
+
+		article := articles.Article{
+			ID:     articles.LinkToID(link),
+			Title:  title,
+			Link:   link,
+			Tags:   taglist,
+			Author: author,
+			Source: SOURCE_NAME,
 		}
 
-		articles = append(articles, article)
+		lobsterArticles = append(lobsterArticles, article)
 	})
 
-	return articles
+	return lobsterArticles
 }

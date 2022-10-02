@@ -5,13 +5,13 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
+	"github.com/notarock/technews-bot/pkg/articles"
 	"github.com/notarock/technews-bot/pkg/discord"
 	"github.com/notarock/technews-bot/pkg/sources/hackernews"
-	"github.com/peterhellberg/hn"
+	"github.com/notarock/technews-bot/pkg/sources/lobsters"
 )
 
 type BotConfig struct {
@@ -20,13 +20,13 @@ type BotConfig struct {
 
 type Bot struct {
 	discordClient *discord.DiscordClient
-	store         map[int]discord.Article
+	store         map[string]articles.Article
 }
 
 func Init(config BotConfig) (Bot, error) {
 	return Bot{
 		discordClient: &config.DiscordClient,
-		store:         map[int]discord.Article{},
+		store:         map[string]articles.Article{},
 	}, nil
 }
 
@@ -61,37 +61,44 @@ func (b Bot) Serve() {
 	fmt.Println("Ticker stopped")
 }
 
-func GetIssues() []*hn.Item {
-	i := hackernews.FetchLatest(20)
-	var items []*hn.Item
-	keywords := []string{"sre", "linux", "breach", "privacy", "speed", "programming"}
-	for _, item := range i {
-		for _, keyword := range keywords {
-			if strings.Contains(strings.ToLower(item.Title), keyword) {
-				items = append(items, item)
+func GetFilteredIssues() []articles.Article {
+	aggregation := aggregateArticles()
+
+	var filteredArticles []articles.Article
+	subjects := []string{"sre", "linux", "breach", "privacy", "speed", "programming", "golang", "development"}
+
+	for _, article := range aggregation {
+		for _, subject := range subjects {
+			if article.RelatesTo(subject) {
+				filteredArticles = append(filteredArticles, article)
 				break
 			}
 		}
 	}
 
-	return items
+	return filteredArticles
+}
+
+func aggregateArticles() []articles.Article {
+	var aggregation []articles.Article
+
+	hnArticles := hackernews.FetchLatestTopStories()
+	aggregation = append(aggregation, hnArticles...)
+
+	lbArticles := lobsters.FetchLatestArticles()
+	aggregation = append(aggregation, lbArticles...)
+
+	return aggregation
 }
 
 func (b Bot) SendArticles() {
-	items := GetIssues()
-	for _, item := range items {
-		fromStore, ok := b.store[item.ID]
+	filteredArticles := GetFilteredIssues()
+	for _, article := range filteredArticles {
+		fromStore, ok := b.store[article.ID]
 
 		if !ok {
-			a := discord.Article{
-				Title:   item.Title,
-				Link:    item.URL,
-				Summary: item.Text,
-				Author:  item.By,
-			}
-			b.discordClient.SendArticle(a)
-
-			b.store[item.ID] = a
+			b.discordClient.SendArticle(article)
+			b.store[article.ID] = article
 		} else {
 			log.Println("Article already send", fromStore)
 		}

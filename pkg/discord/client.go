@@ -10,6 +10,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/notarock/technews-bot/pkg/articles"
 )
 
 type DiscordConfig struct {
@@ -70,24 +71,9 @@ func healthcheckHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-type Article struct {
-	Title   string
-	Link    string
-	Summary string
-	Author  string
-}
-
-func (dc DiscordClient) SendArticle(a Article) {
-	log.Println("Attempting to send article named ", a)
-
-	dc.client.ChannelMessageSendEmbed(dc.channel, &discordgo.MessageEmbed{
-		URL:         a.Link,
-		Type:        "link",
-		Title:       a.Title,
-		Description: a.Summary,
-		Timestamp:   "",
-		Color:       0,
-		Author:      &discordgo.MessageEmbedAuthor{URL: fmt.Sprintf("https://news.ycombinator.com/user?id=%s", a.Author), Name: a.Author, IconURL: "https://news.ycombinator.com/y18.gif"},
-		Fields:      []*discordgo.MessageEmbedField{},
-	})
+func (dc DiscordClient) SendArticle(a articles.Article) {
+	log.Println(fmt.Sprintf("Attempting to send article named %+v", a))
+	embed := a.ToDiscordEmbed()
+	m, _ := dc.client.ChannelMessageSendEmbed(dc.channel, embed)
+	log.Println(m)
 }
