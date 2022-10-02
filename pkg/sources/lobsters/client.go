@@ -30,18 +30,16 @@ func FetchLatestArticles() []articles.Article {
 	}
 
 	doc.Find(".details").Each(func(i int, s *goquery.Selection) {
-		// For each item found, get the title
+		// For each item found, get the title, link, tags and author.
 		ul := s.Find(".u-url")
 		title := ul.Text()
 		link, _ := ul.Attr("href")
+		author := s.Find(".u-author").Text()
 
 		var taglist []string
-
 		if tags, ok := s.Find(".tag").Attr("title"); ok {
 			taglist = strings.Split(tags, TAGS_SEPARATOR)
 		}
-
-		author := s.Find(".u-author").Text()
 
 		article := articles.Article{
 			ID:     articles.LinkToID(link),

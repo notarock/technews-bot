@@ -38,7 +38,7 @@ func (b Bot) Serve() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 
-	b.SendArticles()
+	b.filterAndSendArticles()
 
 	go b.discordClient.Wait()
 
@@ -48,7 +48,7 @@ func (b Bot) Serve() {
 			case <-done:
 				return
 			case t := <-ticker.C:
-				b.SendArticles()
+				b.filterAndSendArticles()
 				fmt.Println("Tick at", t)
 			}
 		}
@@ -58,25 +58,7 @@ func (b Bot) Serve() {
 	<-sc
 	ticker.Stop()
 	done <- true
-	fmt.Println("Ticker stopped")
-}
-
-func GetFilteredIssues() []articles.Article {
-	aggregation := aggregateArticles()
-
-	var filteredArticles []articles.Article
-	subjects := []string{"sre", "linux", "breach", "privacy", "speed", "programming", "golang", "development"}
-
-	for _, article := range aggregation {
-		for _, subject := range subjects {
-			if article.RelatesTo(subject) {
-				filteredArticles = append(filteredArticles, article)
-				break
-			}
-		}
-	}
-
-	return filteredArticles
+	fmt.Println("Received closing signal: exiting.")
 }
 
 func aggregateArticles() []articles.Article {
@@ -91,8 +73,10 @@ func aggregateArticles() []articles.Article {
 	return aggregation
 }
 
-func (b Bot) SendArticles() {
-	filteredArticles := GetFilteredIssues()
+func (b Bot) filterAndSendArticles() {
+	aggregation := aggregateArticles()
+	filteredArticles := filterArticles(aggregation)
+
 	for _, article := range filteredArticles {
 		fromStore, ok := b.store[article.ID]
 
@@ -100,9 +84,25 @@ func (b Bot) SendArticles() {
 			b.discordClient.SendArticle(article)
 			b.store[article.ID] = article
 			// Don't wanna spam too much aight
-			time.Sleep(10 * time.Second)
+			time.Sleep(3 * time.Second)
 		} else {
 			log.Println("Article already sent", fromStore)
 		}
 	}
+}
+
+func filterArticles(aggregation []articles.Article) []articles.Article {
+	var filteredArticles []articles.Article
+	subjects := []string{"sre", "linux", "breach", "privacy", "speed", "programming", "golang", "development"}
+
+	for _, article := range aggregation {
+		for _, subject := range subjects {
+			if article.RelatesTo(subject) {
+				filteredArticles = append(filteredArticles, article)
+				break // Do not send article twice when match many subjects
+			}
+		}
+	}
+
+	return filteredArticles
 }

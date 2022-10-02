@@ -17,7 +17,7 @@ func main() {
 	}
 
 	if discordConfig.Channel == "" || discordConfig.Token == "" {
-		log.Fatalln("Cant run: bad config")
+		log.Fatalln("Cant start technews bot: some env variables are missing.")
 	}
 
 	discord, err := discord.Init(discordConfig)
