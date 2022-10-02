@@ -99,8 +99,10 @@ func (b Bot) SendArticles() {
 		if !ok {
 			b.discordClient.SendArticle(article)
 			b.store[article.ID] = article
+			// Don't wanna spam too much aight
+			time.Sleep(10 * time.Second)
 		} else {
-			log.Println("Article already send", fromStore)
+			log.Println("Article already sent", fromStore)
 		}
 	}
 }
