@@ -1,16 +1,32 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/notarock/technews-bot/pkg/bot"
+	"github.com/notarock/technews-bot/pkg/database"
 	"github.com/notarock/technews-bot/pkg/discord"
 )
 
 func main() {
+	mongodbConfig := database.MongodbConfig{
+		Uri: os.Getenv("MONGODB_URI"),
+	}
+
+	err := database.Connect(mongodbConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = database.Client.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	discordConfig := discord.DiscordConfig{
 		Token:   os.Getenv("DISCORD_TOKEN"),
 		Channel: os.Getenv("DISCORD_CHANNEL"),
