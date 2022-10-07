@@ -8,3 +8,4 @@ services:
     # environment:
     #   DISCORD_TOKEN: ""
     #   DISCORD_CHANNEL: ""
+    #   MONGODB_URI: ""
