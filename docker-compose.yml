@@ -3,9 +3,28 @@ version: "3.7"
 services:
   technews:
     build: .
-    restart: on-failure
     env_file: .env
-    # environment:
-    #   DISCORD_TOKEN: ""
-    #   DISCORD_CHANNEL: ""
-    #   MONGODB_URI: ""
+    environment:
+      MONGODB_URI: "mongodb://root:example@mongo:27017/"
+      MONGODB_DBNAME: "technews_bot"
+    depends_on:
+      - "mongo"
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/

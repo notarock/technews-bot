@@ -8,15 +8,21 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Client *mongo.Client
-
-type MongodbConfig struct {
-	Uri string
+type MongoCollections struct {
+	Guild *mongo.Collection
 }
 
-func Connect(mongodbConfig MongodbConfig) error {
+var Client *mongo.Client
+var collections MongoCollections
+
+type MongodbConfig struct {
+	Uri    string
+	DbName string
+}
+
+func Connect(mongodbConfig MongodbConfig) (err error) {
 	clientOptions := options.Client().ApplyURI(mongodbConfig.Uri)
-	Client, err := mongo.NewClient(clientOptions)
+	Client, err = mongo.NewClient(clientOptions)
 	if err != nil {
 		return err
 	}
@@ -25,6 +31,12 @@ func Connect(mongodbConfig MongodbConfig) error {
 	err = Client.Connect(ctx)
 	if err != nil {
 		return err
+	}
+
+	db := Client.Database(mongodbConfig.DbName)
+	guildCollection := db.Collection(GUILD_COLLECTION)
+	collections = MongoCollections{
+		Guild: guildCollection,
 	}
 
 	return nil

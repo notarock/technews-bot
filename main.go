@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -10,11 +9,13 @@ import (
 	"github.com/notarock/technews-bot/pkg/bot"
 	"github.com/notarock/technews-bot/pkg/database"
 	"github.com/notarock/technews-bot/pkg/discord"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 	mongodbConfig := database.MongodbConfig{
-		Uri: os.Getenv("MONGODB_URI"),
+		Uri:    os.Getenv("MONGODB_URI"),
+		DbName: os.Getenv("MONGODB_DBNAME"),
 	}
 
 	err := database.Connect(mongodbConfig)
