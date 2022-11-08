@@ -5,33 +5,35 @@ import (
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const GUILD_COLLECTION = "discord_guilds"
 
 type Guild struct {
-	ID        string   `json:"id,omitempty" bson:"_id,omitempty"`
-	GuildID   int      `json:"guildId,omitempty" bson:"guildId,omitempty"`
-	Name      string   `json:"name" bson:"name,omitempty"`
-	Settings  Settings `json:"settings" bson:"settings,omitempty"`
-	ChangedAt int64    `json:"changed_at" bson:"changed_at"`
+	ID        string        `json:"id,omitempty" bson:"_id,omitempty"`
+	GuildID   string        `json:"guildId,omitempty" bson:"guildId,omitempty"`
+	Name      string        `json:"name" bson:"name,omitempty"`
+	Settings  GuildSettings `json:"settings" bson:"settings,omitempty"`
+	ChangedAt int64         `json:"changed_at" bson:"changed_at"`
 }
 
-type Settings struct {
-	ChannelID int      `json:"channelId" bson:"channelId,omitempty"`
+type GuildSettings struct {
+	ChannelID string   `json:"channelId" bson:"channelId,omitempty"`
 	Interests []string `json:"interests" bson:"interests,omitempty"`
 }
 
-func NewGuild(name string, guildID int) *Guild {
+func NewGuild(name, guildID string, s GuildSettings) *Guild {
 	return &Guild{
 		GuildID:  guildID,
 		Name:     name,
-		Settings: Settings{},
+		Settings: s,
 	}
 }
 
-func InsertGuild(g *Guild) error {
+func InsertGuild(g *Guild) (*Guild, error) {
 	manyContacts := []interface{}{
 		g,
 	}
@@ -50,5 +52,24 @@ func InsertGuild(g *Guild) error {
 
 	fmt.Printf("Inserted %v %T\n", contactIDs_, contactIDs_)
 
-	return err
+	return g, err
+}
+
+func GetAllGuilds() (guilds []Guild, err error) {
+	cur, err := collections.Guild.Find(context.TODO(), bson.D{}, options.Find())
+	if err != nil {
+		return guilds, err
+	}
+
+	for cur.Next(context.TODO()) {
+		//Create a value into which the single document can be decoded
+		var g Guild
+		err := cur.Decode(&g)
+		if err != nil {
+			return guilds, err
+		}
+
+		guilds = append(guilds, g)
+	}
+	return guilds, nil
 }

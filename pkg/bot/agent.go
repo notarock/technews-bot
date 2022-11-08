@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/notarock/technews-bot/pkg/articles"
+	"github.com/notarock/technews-bot/pkg/database"
 	"github.com/notarock/technews-bot/pkg/discord"
 	"github.com/notarock/technews-bot/pkg/sources/hackernews"
 	"github.com/notarock/technews-bot/pkg/sources/lobsters"
@@ -79,21 +80,30 @@ func (b Bot) filterAndSendArticles() {
 		return
 	}
 
+	guilds, err := database.GetAllGuilds()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 	aggregation := aggregateArticles()
-	filteredArticles := filterArticles(aggregation)
 
-	for _, article := range filteredArticles {
-		fromStore, ok := b.store[article.ID]
+	for _, guild := range guilds {
+		filteredArticles := filterArticles(aggregation)
+		for _, article := range filteredArticles {
+			fromStore, ok := b.store[article.ID]
 
-		if !ok {
-			b.discordClient.SendArticle(article)
-			b.store[article.ID] = article
-			// Don't wanna spam too much aight
-			time.Sleep(3 * time.Second)
-		} else {
-			log.Println("Article already sent", fromStore)
+			if !ok {
+				b.discordClient.SendArticle(article, guild.Settings.ChannelID)
+				b.store[article.ID] = article
+				// Don't wanna spam too much aight
+				time.Sleep(3 * time.Second)
+			} else {
+				log.Println("Article already sent", fromStore)
+			}
 		}
 	}
+
 }
 
 func filterArticles(aggregation []articles.Article) []articles.Article {

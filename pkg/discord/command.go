@@ -13,6 +13,7 @@ type Command struct {
 
 const (
 	COMMAND_TYPE_HELP = "help"
+	COMMAND_TYPE_BIND = "bind"
 )
 
 func parseCommandMessage(message string) Command {
@@ -31,10 +32,12 @@ func parseCommandMessage(message string) Command {
 	}
 }
 
-func (c Command) Execute(guildId, channelId string) discordgo.MessageEmbed {
+func (c Command) Execute(s *discordgo.Session, m *discordgo.MessageCreate) discordgo.MessageEmbed {
 	switch c.Action {
 	case COMMAND_TYPE_HELP:
 		return HelpEmbed
+	case COMMAND_TYPE_BIND:
+		return bindToChannel(s, m)
 	default:
 		return invalidCommandError(c.Action)
 	}

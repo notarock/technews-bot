@@ -29,11 +29,10 @@ func main() {
 	}
 
 	discordConfig := discord.DiscordConfig{
-		Token:   os.Getenv("DISCORD_TOKEN"),
-		Channel: os.Getenv("DISCORD_CHANNEL"),
+		Token: os.Getenv("DISCORD_TOKEN"),
 	}
 
-	if discordConfig.Channel == "" || discordConfig.Token == "" {
+	if discordConfig.Token == "" {
 		log.Fatalln("Cant start technews bot: some env variables are missing.")
 	}
 

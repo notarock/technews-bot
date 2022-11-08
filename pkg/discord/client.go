@@ -15,13 +15,11 @@ import (
 )
 
 type DiscordConfig struct {
-	Token   string
-	Channel string
+	Token string
 }
 
 type DiscordClient struct {
-	client  *discordgo.Session
-	channel string
+	client *discordgo.Session
 }
 
 func Init(config DiscordConfig) (DiscordClient, error) {
@@ -39,8 +37,7 @@ func Init(config DiscordConfig) (DiscordClient, error) {
 	dg.Identify.Intents = discordgo.IntentsGuildMessages
 
 	return DiscordClient{
-		client:  dg,
-		channel: config.Channel,
+		client: dg,
 	}, nil
 
 	// // Open a websocket connection to Discord and begin listening.
@@ -72,7 +69,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		command := parseCommandMessage(m.Content)
 		fmt.Printf("received command %+v", command)
 
-		response := command.Execute(m.GuildID, m.ChannelID)
+		response := command.Execute(s, m)
 
 		_, err := s.ChannelMessageSendEmbed(m.ChannelID, &response)
 		if err != nil {
@@ -81,9 +78,9 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func (dc DiscordClient) SendArticle(a articles.Article) {
+func (dc DiscordClient) SendArticle(a articles.Article, channel string) {
 	log.Println(fmt.Sprintf("Attempting to send article named %+v", a))
 	embed := a.ToDiscordEmbed()
-	m, _ := dc.client.ChannelMessageSendEmbed(dc.channel, embed)
+	m, _ := dc.client.ChannelMessageSendEmbed(channel, embed)
 	log.Println(m)
 }
