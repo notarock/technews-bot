@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -32,7 +33,7 @@ func Init(config DiscordConfig) (DiscordClient, error) {
 	}
 
 	// Register the messageCreate func as a callback for MessageCreate events.
-	dg.AddHandler(healthcheckHandler)
+	dg.AddHandler(messageHandler)
 
 	// In this example, we only care about receiving message events.
 	dg.Identify.Intents = discordgo.IntentsGuildMessages
@@ -60,14 +61,23 @@ func (dc DiscordClient) Wait() error {
 	return nil
 }
 
-func healthcheckHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+// messageHandler handles an incomming message, checks for command action and execute them
+// if they are prefixed with "!technews".
+func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
-	// If the message is "ping" reply with "Pong!"
-	if m.Content == "!ping" {
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
+	if strings.HasPrefix(m.Content, "!technews") {
+		command := parseCommandMessage(m.Content)
+		fmt.Printf("received command %+v", command)
+
+		response := command.Execute(m.GuildID, m.ChannelID)
+
+		_, err := s.ChannelMessageSendEmbed(m.ChannelID, &response)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 

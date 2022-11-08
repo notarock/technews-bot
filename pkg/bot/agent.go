@@ -74,6 +74,11 @@ func aggregateArticles() []articles.Article {
 }
 
 func (b Bot) filterAndSendArticles() {
+	if os.Getenv("DRY_RUN") == "true" {
+		log.Println("Dry run, do nothing")
+		return
+	}
+
 	aggregation := aggregateArticles()
 	filteredArticles := filterArticles(aggregation)
 
