@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -32,14 +33,16 @@ func Init(config BotConfig) (Bot, error) {
 }
 
 func (b Bot) Serve() {
+	//TODO: Check for DEBUG=TRUE
+	// ticker := time.NewTicker(5 * time.Second) // Uncomment for local testing
 	ticker := time.NewTicker(5 * time.Minute)
 	done := make(chan bool)
+
+	var m sync.Mutex
 
 	log.Println("Bot is now running in the background.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-
-	b.filterAndSendArticles()
 
 	go b.discordClient.Wait()
 
@@ -49,8 +52,16 @@ func (b Bot) Serve() {
 			case <-done:
 				return
 			case t := <-ticker.C:
-				b.filterAndSendArticles()
 				fmt.Println("Tick at", t)
+				go func() {
+					if m.TryLock() {
+						fmt.Println("Starting to send articles")
+						defer m.Unlock()
+						b.filterAndSendArticles()
+					} else {
+						fmt.Println("Job already running. Skipped")
+					}
+				}()
 			}
 		}
 	}()

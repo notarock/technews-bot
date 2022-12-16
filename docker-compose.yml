@@ -11,6 +11,7 @@ services:
       - "mongo"
 
   mongo:
+    profiles: ["database"]
     image: mongo
     restart: unless-stopped
     ports:
@@ -20,6 +21,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
 
   mongo-express:
+    profiles: ["database"]
     image: mongo-express
     restart: unless-stopped
     ports:
