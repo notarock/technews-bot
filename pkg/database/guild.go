@@ -83,7 +83,7 @@ func AddSubjectToGuild(g Guild, subject string) (int64, error) {
 	}
 
 	selectedGuild.Settings.Subjects = append(selectedGuild.Settings.Subjects, subject)
-	update := bson.D{primitive.E{Key: "$set", Value: bson.D{primitive.E{Key: "subjects", Value: selectedGuild.Settings.Subjects}}}}
+	update := bson.D{primitive.E{Key: "$set", Value: bson.D{primitive.E{Key: "settings", Value: selectedGuild.Settings}}}}
 	result, err := collections.Guild.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return 0, err

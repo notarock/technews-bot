@@ -1,9 +1,10 @@
 package discord
 
 import (
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/notarock/technews-bot/pkg/database"
-	"strings"
 )
 
 func addSubjectToChannel(s *discordgo.Session, m *discordgo.MessageCreate) discordgo.MessageEmbed {
@@ -32,6 +33,6 @@ func addSubjectToChannel(s *discordgo.Session, m *discordgo.MessageCreate) disco
 	}
 
 	return discordgo.MessageEmbed{
-		Title: "Cannot bind the subject.",
+		Title: "Cannot bind the subject. Use the bind command first",
 	}
 }
