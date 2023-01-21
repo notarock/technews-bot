@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"fmt"
+	"fmt" //TODO: Proper logging
 
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"

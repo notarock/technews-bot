@@ -1,7 +1,7 @@
 package discord
 
 import (
-	"fmt"
+	"fmt" //TODO: Proper logging
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/notarock/technews-bot/pkg/database"
@@ -27,5 +27,4 @@ func bindToChannel(s *discordgo.Session, m *discordgo.MessageCreate) discordgo.M
 	return discordgo.MessageEmbed{
 		Title: "Bound to channel successfully!",
 	}
-
 }
