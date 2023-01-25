@@ -22,7 +22,7 @@ type Guild struct {
 
 type GuildSettings struct {
 	ChannelID string   `json:"channelId" bson:"channelId,omitempty"`
-	Interests []string `json:"interests" bson:"interests,omitempty"`
+	Subjects  []string `json:"subjects" bson:"subjects,omitempty"`
 }
 
 func NewGuild(name, guildID string, s GuildSettings) *Guild {
@@ -72,4 +72,22 @@ func GetAllGuilds() (guilds []Guild, err error) {
 		guilds = append(guilds, g)
 	}
 	return guilds, nil
+}
+
+func AddSubjectToGuild(g Guild, subject string) (int64, error) {
+	var selectedGuild Guild
+	filter := bson.D{primitive.E{Key: "guildId", Value: g.GuildID}}
+	err := collections.Guild.FindOne(context.TODO(), filter).Decode(&selectedGuild)
+	if err != nil {
+		return 0, err
+	}
+
+	selectedGuild.Settings.Subjects = append(selectedGuild.Settings.Subjects, subject)
+	update := bson.D{primitive.E{Key: "$set", Value: bson.D{primitive.E{Key: "settings", Value: selectedGuild.Settings}}}}
+	result, err := collections.Guild.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return result.MatchedCount, nil // the result.MatchCount should equal to 1
 }

@@ -100,7 +100,7 @@ func (b Bot) filterAndSendArticles() {
 	aggregation := aggregateArticles()
 
 	for _, guild := range guilds {
-		filteredArticles := filterArticles(aggregation)
+		filteredArticles := filterArticles(aggregation, guild)
 		for _, article := range filteredArticles {
 			fromStore, ok := b.store[article.ID]
 
@@ -114,15 +114,12 @@ func (b Bot) filterAndSendArticles() {
 			}
 		}
 	}
-
 }
 
-func filterArticles(aggregation []articles.Article) []articles.Article {
+func filterArticles(aggregation []articles.Article, guild database.Guild) []articles.Article {
 	var filteredArticles []articles.Article
-	subjects := []string{"sre", "linux", "breach", "privacy", "speed", "programming", "golang", "development"}
-
 	for _, article := range aggregation {
-		for _, subject := range subjects {
+		for _, subject := range guild.Settings.Subjects {
 			if article.RelatesTo(subject) {
 				filteredArticles = append(filteredArticles, article)
 				break // Do not send article twice when match many subjects
