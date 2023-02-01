@@ -3,6 +3,10 @@
 Aggregate tech news articles from multiple news sources, filter them based on
 your favorite subjects and send them to a chat platform of your choice.
 
+## Invite link
+
+[Technews Bot invite link](https://discord.com/oauth2/authorize?client_id=1020502388462854165&scope=bot&permissions=8)
+
 ## Supported news sources
 
 -   [https://lobste.rs/](https://lobste.rs/)
