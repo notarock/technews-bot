@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"fmt" //TODO: Proper logging
 
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -50,7 +49,7 @@ func InsertGuild(g *Guild) (*Guild, error) {
 		contactIDs_ = append(contactIDs_, id.(primitive.ObjectID))
 	}
 
-	fmt.Printf("Inserted %v %T\n", contactIDs_, contactIDs_)
+	log.Printf("Inserted %v %T\n", contactIDs_, contactIDs_)
 
 	return g, err
 }

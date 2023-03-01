@@ -33,9 +33,13 @@ func Init(config BotConfig) (Bot, error) {
 }
 
 func (b Bot) Serve() {
-	//TODO: Check for DEBUG=TRUE
-	// ticker := time.NewTicker(5 * time.Second) // Uncomment for local testing
-	ticker := time.NewTicker(5 * time.Minute)
+	var ticker *time.Ticker
+	if os.Getenv("DEBUG") == "true" {
+		ticker = time.NewTicker(5 * time.Second) // Uncomment for local testing
+	} else {
+		ticker = time.NewTicker(5 * time.Minute)
+	}
+
 	done := make(chan bool)
 
 	var m sync.Mutex
