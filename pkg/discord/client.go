@@ -67,7 +67,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if strings.HasPrefix(m.Content, "!technews") {
 		command := parseCommandMessage(m.Content)
-		fmt.Printf("received command %+v", command)
+		fmt.Printf("received command %+v\n", command)
 
 		response := command.Execute(s, m)
 
@@ -79,7 +79,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func (dc DiscordClient) SendArticle(a articles.Article, channel string) {
-	log.Println(fmt.Sprintf("Attempting to send article named %+v", a))
+	log.Printf("Attempting to send article named %+v\n", a)
 	embed := a.ToDiscordEmbed()
 	m, _ := dc.client.ChannelMessageSendEmbed(channel, embed)
 	log.Println(m)

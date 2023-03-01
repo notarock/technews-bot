@@ -32,6 +32,13 @@ func NewGuild(name, guildID string, s GuildSettings) *Guild {
 	}
 }
 
+func FindGuildByGuildID(guildID string) (Guild, error) {
+	var guild Guild
+	filter := bson.M{"guildId": guildID}
+	err := collections.Guild.FindOne(context.TODO(), filter).Decode(&guild)
+	return guild, err
+}
+
 func InsertGuild(g *Guild) (*Guild, error) {
 	manyContacts := []interface{}{
 		g,
