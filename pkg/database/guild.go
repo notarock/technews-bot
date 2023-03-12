@@ -99,8 +99,8 @@ func (g *Guild) AddChannelSubject(channelID string, subject string) {
 	for i := 0; i < len(g.ChannelSubjects); i++ {
 		if g.ChannelSubjects[i].ChannelID == channelID {
 
-			for _, subject := range g.ChannelSubjects[i].Subjects {
-				if subject == subject { // subject already exists
+			for _, channelSubject := range g.ChannelSubjects[i].Subjects {
+				if channelSubject == subject { // subject already exists
 					return
 				}
 			}
