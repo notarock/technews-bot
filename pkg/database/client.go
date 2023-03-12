@@ -9,7 +9,8 @@ import (
 )
 
 type MongoCollections struct {
-	Guild *mongo.Collection
+	Guild   *mongo.Collection
+	Article *mongo.Collection
 }
 
 var Client *mongo.Client
@@ -34,9 +35,13 @@ func Connect(mongodbConfig MongodbConfig) (err error) {
 	}
 
 	db := Client.Database(mongodbConfig.DbName)
+
 	guildCollection := db.Collection(GUILD_COLLECTION)
+	articleCollection := db.Collection(ARTICLE_COLLECTION)
+
 	collections = MongoCollections{
-		Guild: guildCollection,
+		Guild:   guildCollection,
+		Article: articleCollection,
 	}
 
 	return nil

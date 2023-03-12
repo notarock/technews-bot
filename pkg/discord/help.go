@@ -13,11 +13,6 @@ var HelpEmbed = discordgo.MessageEmbed{
 			Inline: true,
 		},
 		{
-			Name:   "`bind`",
-			Value:  "Bind technews to the current channel. It will then send it's news articles to that channel.",
-			Inline: true,
-		},
-		{
 			Name:   "`addsubject`",
 			Value:  "Add a technews subject to a bound channel.",
 			Inline: true,

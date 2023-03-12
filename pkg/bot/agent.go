@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -22,13 +23,11 @@ type BotConfig struct {
 
 type Bot struct {
 	discordClient *discord.DiscordClient
-	store         map[string]articles.Article
 }
 
 func Init(config BotConfig) (Bot, error) {
 	return Bot{
 		discordClient: &config.DiscordClient,
-		store:         map[string]articles.Article{},
 	}, nil
 }
 
@@ -103,33 +102,39 @@ func (b Bot) filterAndSendArticles() {
 
 	aggregation := aggregateArticles()
 
-	for _, guild := range guilds {
-		filteredArticles := filterArticles(aggregation, guild)
-		for _, article := range filteredArticles {
-			fromStore, ok := b.store[article.ID]
-
-			if !ok {
-				b.discordClient.SendArticle(article, guild.Settings.ChannelID)
-				b.store[article.ID] = article
-				// Don't wanna spam too much aight
-				time.Sleep(3 * time.Second)
-			} else {
-				log.Println("Article already sent", fromStore)
-			}
-		}
-	}
-}
-
-func filterArticles(aggregation []articles.Article, guild database.Guild) []articles.Article {
-	var filteredArticles []articles.Article
 	for _, article := range aggregation {
-		for _, subject := range guild.Settings.Subjects {
-			if article.RelatesTo(subject) {
-				filteredArticles = append(filteredArticles, article)
-				break // Do not send article twice when match many subjects
+		dbArticle, err := database.FindArticleByLink(article.Link)
+		if err != nil {
+			log.Printf("failed to fetch article in db: %v\n", err)
+			continue
+		}
+
+		if dbArticle.ID != "" { // Article already sent
+			if os.Getenv("DEBUG") == "true" {
+				log.Printf("Article already sent: %s\n", article.Link)
+			}
+			continue
+		}
+
+		for _, guild := range guilds {
+
+			for _, chanSubject := range guild.ChannelSubjects {
+				sent := false
+				for _, subject := range chanSubject.Subjects {
+					if article.RelatesTo(subject) && !sent {
+						b.discordClient.SendArticle(article, chanSubject.ChannelID)
+						time.Sleep(250 * time.Millisecond)
+						sent = true
+					}
+				}
 			}
 		}
-	}
 
-	return filteredArticles
+		// Save article in db
+		err = database.InsertArticle(context.TODO(), database.Article{
+			ArticleID: article.ID,
+			Link:      article.Link,
+			ChangedAt: 0,
+		})
+	}
 }

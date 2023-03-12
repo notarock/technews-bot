@@ -5,34 +5,41 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/notarock/technews-bot/pkg/database"
+	log "github.com/sirupsen/logrus"
 )
 
 func addSubjectToChannel(s *discordgo.Session, m *discordgo.MessageCreate) discordgo.MessageEmbed {
-	guild, err := s.Guild(m.GuildID)
+	subjectToAdd := strings.ReplaceAll(m.Content, "!technews addsubject ", "")
+	guild, err := database.FindGuildByGuildID(m.GuildID)
 	if err != nil {
+		log.Errorf("error occured while trying to find guild by guildId: %v:", err)
 		return ErrorEmbed
 	}
 
-	guilds, err := database.GetAllGuilds()
-	if err != nil {
-		return ErrorEmbed
-	}
+	if guild.ID == "" { // Guild not found
+		discordGuild, err := s.Guild(m.GuildID)
+		if err != nil {
+			log.Errorf("error occured while trying to find discord guild: %v:", err)
+			return ErrorEmbed
+		}
 
-	for _, g := range guilds {
-		if g.GuildID == guild.ID && g.Settings.ChannelID == m.ChannelID {
-			contentWithoutCmd := strings.ReplaceAll(m.Content, "!technews addsubject ", "")
-			_, err := database.AddSubjectToGuild(g, contentWithoutCmd)
-			if err != nil {
-				return ErrorEmbed
-			}
+		guild, err = database.InsertGuild(database.NewGuild(discordGuild.ID, discordGuild.Name))
 
-			return discordgo.MessageEmbed{
-				Title: "Subject added to channel successfully!",
-			}
+		if err != nil {
+			log.Errorf("error occured while trying to insert new guild in db: %v:", err)
+			return ErrorEmbed
 		}
 	}
 
-	return discordgo.MessageEmbed{
-		Title: "Cannot bind the subject. Use the bind command first",
+	guild.AddChannelSubject(m.ChannelID, subjectToAdd)
+	err = guild.Save()
+	if err != nil {
+		log.Errorf("error occured while trying to save subject in db: %v:", err)
+		return ErrorEmbed
 	}
+
+	return discordgo.MessageEmbed{
+		Title: "Subject added to channel successfully!",
+	}
+
 }

@@ -2,33 +2,43 @@ package database
 
 import (
 	"context"
+	"fmt"
+	"time"
 
-	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const GUILD_COLLECTION = "discord_guilds"
 
 type Guild struct {
-	ID        string        `json:"id,omitempty" bson:"_id,omitempty"`
-	GuildID   string        `json:"guildId,omitempty" bson:"guildId,omitempty"`
-	Name      string        `json:"name" bson:"name,omitempty"`
-	Settings  GuildSettings `json:"settings" bson:"settings,omitempty"`
-	ChangedAt int64         `json:"changed_at" bson:"changed_at"`
+	ID              string            `json:"id,omitempty" bson:"_id,omitempty"`
+	GuildID         string            `json:"guildId,omitempty" bson:"guildId,omitempty"`
+	Name            string            `json:"name" bson:"name,omitempty"`
+	Settings        Settings          `json:"Settings" bson:"Settings,omitempty"`
+	ChannelSubjects []ChannelSubjects `json:"channelSubjects" bson:"channelSubjects,omitempty"`
+	ChangedAt       int64             `json:"changed_at" bson:"changed_at"`
 }
 
-type GuildSettings struct {
+type ChannelSubjects struct {
 	ChannelID string   `json:"channelId" bson:"channelId,omitempty"`
 	Subjects  []string `json:"subjects" bson:"subjects,omitempty"`
 }
 
-func NewGuild(name, guildID string, s GuildSettings) *Guild {
-	return &Guild{
-		GuildID:  guildID,
-		Name:     name,
-		Settings: s,
+type Settings struct {
+	Active bool `json:"active" bson:"active"`
+}
+
+func NewGuild(guildID, name string) Guild {
+	return Guild{
+		GuildID: guildID,
+		Name:    name,
+		Settings: Settings{
+			Active: true,
+		},
+		ChangedAt: time.Now().Unix(),
 	}
 }
 
@@ -36,35 +46,23 @@ func FindGuildByGuildID(guildID string) (Guild, error) {
 	var guild Guild
 	filter := bson.M{"guildId": guildID}
 	err := collections.Guild.FindOne(context.TODO(), filter).Decode(&guild)
-	return guild, err
+	if err != nil && err != mongo.ErrNoDocuments {
+		return guild, err
+	}
+
+	return guild, nil
 }
 
-func InsertGuild(g *Guild) (*Guild, error) {
-	manyContacts := []interface{}{
-		g,
-	}
-
-	insertResult, err := collections.Guild.InsertMany(context.TODO(), manyContacts)
-
-	if err != nil {
-		log.Panic(err)
-	}
-	contactIDs := insertResult.InsertedIDs
-	var contactIDs_ []primitive.ObjectID
-
-	for _, id := range contactIDs {
-		contactIDs_ = append(contactIDs_, id.(primitive.ObjectID))
-	}
-
-	log.Printf("Inserted %v %T\n", contactIDs_, contactIDs_)
-
+func InsertGuild(g Guild) (Guild, error) {
+	guild, err := collections.Guild.InsertOne(context.TODO(), g)
+	g.ID = guild.InsertedID.(string)
 	return g, err
 }
 
 func GetAllGuilds() (guilds []Guild, err error) {
 	cur, err := collections.Guild.Find(context.TODO(), bson.D{}, options.Find())
-	if err != nil {
-		return guilds, err
+	if err != nil && err != mongo.ErrNoDocuments {
+		return []Guild{}, err
 	}
 
 	for cur.Next(context.TODO()) {
@@ -80,20 +78,40 @@ func GetAllGuilds() (guilds []Guild, err error) {
 	return guilds, nil
 }
 
-func AddSubjectToGuild(g Guild, subject string) (int64, error) {
-	var selectedGuild Guild
-	filter := bson.D{primitive.E{Key: "guildId", Value: g.GuildID}}
-	err := collections.Guild.FindOne(context.TODO(), filter).Decode(&selectedGuild)
-	if err != nil {
-		return 0, err
+func (g Guild) Save() error {
+	objectID, err := primitive.ObjectIDFromHex(g.ID)
+
+	filter := bson.M{"_id": objectID}
+	update := bson.M{"$set": bson.M{
+		"guildId":         g.GuildID,
+		"name":            g.Name,
+		"Settings":        g.Settings,
+		"channelSubjects": g.ChannelSubjects,
+		"changed_at":      time.Now().Unix(),
+	}}
+	r, err := collections.Guild.UpdateOne(context.TODO(), filter, update)
+	fmt.Printf("%+v\n", g)
+	fmt.Printf("%+v\n", r)
+	return err
+}
+
+func (g *Guild) AddChannelSubject(channelID string, subject string) {
+	for i := 0; i < len(g.ChannelSubjects); i++ {
+		if g.ChannelSubjects[i].ChannelID == channelID {
+
+			for _, subject := range g.ChannelSubjects[i].Subjects {
+				if subject == subject { // subject already exists
+					return
+				}
+			}
+
+			g.ChannelSubjects[i].Subjects = append(g.ChannelSubjects[i].Subjects, subject)
+			return
+		}
 	}
 
-	selectedGuild.Settings.Subjects = append(selectedGuild.Settings.Subjects, subject)
-	update := bson.D{primitive.E{Key: "$set", Value: bson.D{primitive.E{Key: "settings", Value: selectedGuild.Settings}}}}
-	result, err := collections.Guild.UpdateOne(context.TODO(), filter, update)
-	if err != nil {
-		return 0, err
-	}
-
-	return result.MatchedCount, nil // the result.MatchCount should equal to 1
+	g.ChannelSubjects = append(g.ChannelSubjects, ChannelSubjects{
+		ChannelID: channelID,
+		Subjects:  []string{subject},
+	})
 }
