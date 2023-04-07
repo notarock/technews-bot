@@ -26,6 +26,10 @@ func FetchLatestTopStories() []articles.Article {
 			panic(err)
 		}
 
+		if item.URL == "" {
+			continue
+		}
+
 		article := articles.Article{
 			ID:     articles.LinkToID(item.URL),
 			Title:  item.Title,
