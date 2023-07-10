@@ -53,4 +53,5 @@ func listSubjects(s *discordgo.Session, m *discordgo.MessageCreate) discordgo.Me
 		}
 	}
 
+	return response
 }
