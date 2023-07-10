@@ -49,7 +49,7 @@ func listSubjects(s *discordgo.Session, m *discordgo.MessageCreate) discordgo.Me
 	if len(response.Fields) == 0 {
 		return discordgo.MessageEmbed{
 			Title:       "No subjects bound to channels",
-			Description: "Use `!technews addsubject <subject>` to add a subject to the current channel",
+			Description: "Use `!technews add <subject>` to add a subject to the current channel",
 		}
 	}
 

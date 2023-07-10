@@ -11,7 +11,7 @@ import (
 
 func removeSubjectFromChannel(s *discordgo.Session, m *discordgo.MessageCreate) discordgo.MessageEmbed {
 	//TODO: Truncate command from message before reaching this point
-	subjectToRemove := strings.ReplaceAll(m.Content, "!technews removesubject ", "")
+	subjectToRemove := strings.ReplaceAll(m.Content, "!technews remove ", "")
 	guild, err := database.FindGuildByGuildID(m.GuildID)
 	if err != nil {
 		log.Errorf("error occured while trying to find guild by guildId: %v:", err)

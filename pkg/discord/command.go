@@ -13,8 +13,8 @@ type Command struct {
 
 const (
 	COMMAND_TYPE_HELP           = "help"
-	COMMAND_TYPE_ADD_SUBJECT    = "addsubject"
-	COMMAND_TYPE_REMOVE_SUBJECT = "removesubject"
+	COMMAND_TYPE_ADD_SUBJECT    = "add"
+	COMMAND_TYPE_REMOVE_SUBJECT = "remove"
 	COMMAND_TYPE_LIST_SUBJECT   = "list"
 )
 
