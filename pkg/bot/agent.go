@@ -34,7 +34,8 @@ func Init(config BotConfig) (Bot, error) {
 func (b Bot) Serve() {
 	var ticker *time.Ticker
 	if os.Getenv("DEBUG") == "true" {
-		ticker = time.NewTicker(5 * time.Second) // Uncomment for local testing
+		// ticker = time.NewTicker(5 * time.Second) // Uncomment for local testing
+		ticker = time.NewTicker(2 * time.Minute) // Uncomment for local testing
 	} else {
 		ticker = time.NewTicker(5 * time.Minute)
 	}
