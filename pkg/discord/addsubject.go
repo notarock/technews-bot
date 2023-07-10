@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -39,7 +40,7 @@ func addSubjectToChannel(s *discordgo.Session, m *discordgo.MessageCreate) disco
 	}
 
 	return discordgo.MessageEmbed{
-		Title: "Subject added to channel successfully!",
+		Title: fmt.Sprintf("Subject %s added to channel successfully!", subjectToAdd),
 	}
 
 }

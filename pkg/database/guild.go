@@ -115,3 +115,21 @@ func (g *Guild) AddChannelSubject(channelID string, subject string) {
 		Subjects:  []string{subject},
 	})
 }
+
+func (g *Guild) RemoveChannelSubject(channelID string, subject string) {
+	subjectsToKeep := []string{}
+
+	for i := 0; i < len(g.ChannelSubjects); i++ {
+		if g.ChannelSubjects[i].ChannelID == channelID {
+			subjects := g.ChannelSubjects[i].Subjects
+
+			for _, channelSubject := range subjects {
+				if channelSubject != subject {
+					subjectsToKeep = append(subjectsToKeep, channelSubject)
+				}
+			}
+
+			g.ChannelSubjects[i].Subjects = subjectsToKeep
+		}
+	}
+}

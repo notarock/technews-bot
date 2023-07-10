@@ -12,9 +12,10 @@ type Command struct {
 }
 
 const (
-	COMMAND_TYPE_HELP         = "help"
-	COMMAND_TYPE_ADD_SUBJECT  = "addsubject"
-	COMMAND_TYPE_LIST_SUBJECT = "list"
+	COMMAND_TYPE_HELP           = "help"
+	COMMAND_TYPE_ADD_SUBJECT    = "addsubject"
+	COMMAND_TYPE_REMOVE_SUBJECT = "removesubject"
+	COMMAND_TYPE_LIST_SUBJECT   = "list"
 )
 
 func parseCommandMessage(message string) Command {
@@ -39,6 +40,8 @@ func (c Command) Execute(s *discordgo.Session, m *discordgo.MessageCreate) disco
 		return HelpEmbed
 	case COMMAND_TYPE_ADD_SUBJECT:
 		return addSubjectToChannel(s, m)
+	case COMMAND_TYPE_REMOVE_SUBJECT:
+		return removeSubjectFromChannel(s, m)
 	case COMMAND_TYPE_LIST_SUBJECT:
 		return listSubjects(s, m)
 	default:
