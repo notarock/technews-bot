@@ -13,8 +13,18 @@ var HelpEmbed = discordgo.MessageEmbed{
 			Inline: true,
 		},
 		{
-			Name:   "`addsubject`",
+			Name:   "`list`",
+			Value:  "Print all bound channels and their related subjects.",
+			Inline: true,
+		},
+		{
+			Name:   "`add`",
 			Value:  "Add a technews subject to a bound channel.",
+			Inline: true,
+		},
+		{
+			Name:   "`remove`",
+			Value:  "Remove a technews subject from a bound channel.",
 			Inline: true,
 		},
 	},

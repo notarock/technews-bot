@@ -10,7 +10,7 @@ import (
 )
 
 func addSubjectToChannel(s *discordgo.Session, m *discordgo.MessageCreate) discordgo.MessageEmbed {
-	subjectToAdd := strings.ReplaceAll(m.Content, "!technews addsubject ", "")
+	subjectToAdd := strings.ReplaceAll(m.Content, "!technews add ", "")
 	guild, err := database.FindGuildByGuildID(m.GuildID)
 	if err != nil {
 		log.Errorf("error occured while trying to find guild by guildId: %v:", err)
