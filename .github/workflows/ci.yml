@@ -1,0 +1,10 @@
+name: CI using Tuyauterie Build
+
+on: [push, pull_request, release, workflow_dispatch]
+
+jobs:
+  ci:
+    uses: notarock/tuyauterie/.github/workflows/tuyauterie.yml@main
+    with:
+      tuyauterie-path: .tuyauterie.yaml
+      github-event: ${{ github.event_name }}
