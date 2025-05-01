@@ -7,5 +7,4 @@ jobs:
     uses: notarock/tuyauterie/.github/workflows/tuyauterie.yml@main
     with:
       tuyauterie-path: .tuyauterie.yaml
-      github-runner: 'ubuntu-latest'
       github-event: ${{ github.event_name }}
