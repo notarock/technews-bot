@@ -7,4 +7,5 @@ build:
 
 release:
   rolling: false # Optional, if not provided, defaults to false
-  on-tag: true # Optional, if not provided, defaults to true
+  on_tag: true # Optional, if not provided, defaults to true
+  create_github_release: false # Defaults to false
