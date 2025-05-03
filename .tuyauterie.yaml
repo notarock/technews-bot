@@ -3,6 +3,7 @@ version: 1
 build:
   type: golang  # or "python"
   dockerfile: Dockerfile  # Optional, if not provided, defaults to "Dockerfile"
+  upload-artifacts: true
 
 release:
   rolling: false # Optional, if not provided, defaults to false
