@@ -6,6 +6,6 @@ build:
   upload_artifacts: true
 
 release:
-  rolling: false # Optional, if not provided, defaults to false
+  rolling: false
   on_tag: true # Optional, if not provided, defaults to true
   create_github_release: false # Defaults to false
