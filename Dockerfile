@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine as build
+FROM golang:1.23-alpine as build
 LABEL maintainer="Roch D'Amour <roch.damour@gmail.com>"
 MAINTAINER Roch D'Amour <roch.damour@gmail.com>
 
