@@ -12,6 +12,6 @@ release:
 
 deploy:
   gitops:
-    enabled: true
+    enable: true
     repository: "notarock/gitops"
     manifest: "technews-bot/deployment.yaml"
