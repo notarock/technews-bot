@@ -9,3 +9,9 @@ release:
   rolling: false
   on_tag: true # Optional, if not provided, defaults to true
   create_github_release: false # Defaults to false
+
+deploy:
+  gitops:
+    enabled: true
+    repository: "notarock/gitops"
+    manifest: "technews-bot/deployment.yaml"
