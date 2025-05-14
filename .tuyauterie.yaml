@@ -1,0 +1,17 @@
+version: 1
+
+build:
+  type: golang
+  dockerfile: Dockerfile  # Optional, if not provided, defaults to "Dockerfile"
+  upload_artifacts: true
+
+release:
+  rolling: false
+  on_tag: true # Optional, if not provided, defaults to true
+  create_github_release: false # Defaults to false
+
+deploy:
+  gitops:
+    enable: true
+    repository: "notarock/gitops"
+    manifest: "technews-bot/deployment.yaml"
