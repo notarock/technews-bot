@@ -1,12 +1,16 @@
-name: CI using Tuyauterie Build
-
+name: Tuyauterie
 on:
   push:
   pull_request:
   release:
   workflow_dispatch:
   schedule:
-    - cron: '42 12 22 * *'  # At 12:42 on the 22nd of every month
+    - cron: '45 10 * * 2' # At 10:45 on tuesdays's
+
+permissions:
+  packages: write
+  contents: read
+  id-token: write
 
 jobs:
   main:
