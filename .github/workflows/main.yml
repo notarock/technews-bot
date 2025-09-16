@@ -1,6 +1,13 @@
 name: CI using Tuyauterie Build
 
-on: [push, pull_request, release, workflow_dispatch]
+on:
+  push:
+  pull_request:
+  release:
+  workflow_dispatch:
+  schedule:
+    - cron: '42 12 22 * *'  # At 12:42 on the 22nd of every month
+
 
 jobs:
   main:
@@ -10,3 +17,4 @@ jobs:
       github-event: ${{ github.event_name }}
     secrets:
       GITOPS_REPOSITORY_TOKEN: "${{ secrets.GITOPS_TOKEN }}"
+

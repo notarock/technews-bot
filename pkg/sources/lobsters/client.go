@@ -41,13 +41,27 @@ func FetchLatestArticles() []articles.Article {
 			taglist = strings.Split(tags, TAGS_SEPARATOR)
 		}
 
+		commentsLink := ""
+		s.Find(".comments_label a").EachWithBreak(func(i int, a *goquery.Selection) bool {
+			href, exists := a.Attr("href")
+			if exists {
+				commentsLink = href
+				return false // break after first match
+			}
+			return true
+		})
+		if commentsLink != "" && !strings.HasPrefix(commentsLink, "http") {
+			commentsLink = LOBSTER_URL + commentsLink
+		}
+
 		article := articles.Article{
-			ID:     articles.LinkToID(link),
-			Title:  title,
-			Link:   link,
-			Tags:   taglist,
-			Author: author,
-			Source: SOURCE_NAME,
+			ID:         articles.LinkToID(link),
+			Title:      title,
+			Link:       link,
+			Tags:       taglist,
+			Author:     author,
+			Source:     SOURCE_NAME,
+			ThreadLink: commentsLink,
 		}
 
 		lobsterArticles = append(lobsterArticles, article)
