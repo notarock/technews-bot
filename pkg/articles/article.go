@@ -14,12 +14,13 @@ const (
 )
 
 type Article struct {
-	ID     string
-	Title  string
-	Link   string
-	Tags   []string
-	Author string
-	Source string
+	ID         string
+	Title      string
+	Link       string
+	Tags       []string
+	Author     string
+	Source     string
+	ThreadLink string
 }
 
 func LinkToID(link string) string {
@@ -91,8 +92,13 @@ func (a Article) tagsContains(subject string) bool {
 
 func (a Article) Description() string {
 	desc := fmt.Sprintf("Article posted to %s by user %s.", a.Source, a.Author)
+
 	if len(a.Tags) > 0 {
 		desc += fmt.Sprintf("\nArticle was tagged using these tags: %s", strings.Join(a.Tags, ", "))
+	}
+
+	if a.ThreadLink != "" {
+		desc += fmt.Sprintf("\n[%s](%s)", "View discussion thread", a.ThreadLink)
 	}
 
 	return desc
