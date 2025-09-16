@@ -1,6 +1,8 @@
 package hackernews
 
 import (
+	"fmt"
+
 	"github.com/notarock/technews-bot/pkg/articles"
 	"github.com/peterhellberg/hn"
 )
@@ -31,12 +33,13 @@ func FetchLatestTopStories() []articles.Article {
 		}
 
 		article := articles.Article{
-			ID:     articles.LinkToID(item.URL),
-			Title:  item.Title,
-			Link:   item.URL,
-			Tags:   []string{},
-			Author: item.By,
-			Source: SOURCE_NAME,
+			ID:         articles.LinkToID(item.URL),
+			Title:      item.Title,
+			Link:       item.URL,
+			Tags:       []string{},
+			Author:     item.By,
+			Source:     SOURCE_NAME,
+			ThreadLink: fmt.Sprintf("https://news.ycombinator.com/item?id=%d", item.ID),
 		}
 
 		articleList = append(articleList, article)
