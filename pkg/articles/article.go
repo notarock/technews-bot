@@ -40,7 +40,7 @@ func authorEmbedFromSource(source, author string) *discordgo.MessageEmbedAuthor 
 
 	var iconUrl string
 	if source == "HACKERNEWS" {
-		iconUrl = "https://news.ycombinator.com/y18.gif"
+		iconUrl = "https://news.ycombinator.com/y18.svg"
 	} else if source == "LOBSTERS" {
 		iconUrl = "https://upload.wikimedia.org/wikipedia/commons/e/e7/Lobsters_logo.png"
 	} else {
