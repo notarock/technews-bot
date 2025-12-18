@@ -4,8 +4,6 @@ on:
   pull_request:
   release:
   workflow_dispatch:
-  schedule:
-    - cron: '45 10 * * 2' # At 10:45 on tuesdays's
 
 permissions:
   packages: write
