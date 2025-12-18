@@ -12,7 +12,21 @@ type GeminiClient struct {
 	client *genai.Client
 }
 
-func InitGeminiClient() (*GeminiClient, error) {
+var client *GeminiClient
+
+// Singleton pattern to get the GeminiClient instance
+func GetClient() (*GeminiClient, error) {
+	if client == nil {
+		var err error
+		client, err = initGeminiClient()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
+}
+
+func initGeminiClient() (*GeminiClient, error) {
 	ctx := context.Background()
 	// The client gets the API key from the environment variable `GEMINI_API_KEY`.
 	client, err := genai.NewClient(ctx, nil)
@@ -41,7 +55,7 @@ func (gc *GeminiClient) SummarizeWebpage(URL string) (string, error) {
 func (gc *GeminiClient) summarizeFromHtml(htmlContent string) (string, error) {
 	ctx := context.Background()
 
-	prompt := fmt.Sprintf("Summarize the following content in no longer than 8 sentences:\n\n%s", htmlContent)
+	prompt := fmt.Sprintf("Summarize the following content in a concise paragraph of 1500 characters or less:\n\n%s", htmlContent)
 
 	result, err := gc.client.Models.GenerateContent(
 		ctx,

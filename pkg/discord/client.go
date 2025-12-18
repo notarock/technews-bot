@@ -12,6 +12,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/notarock/technews-bot/pkg/articles"
+	"github.com/notarock/technews-bot/pkg/summarize"
 )
 
 type DiscordConfig struct {
@@ -65,6 +66,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// Handles basic !technews commands
 	if strings.HasPrefix(m.Content, "!technews") {
 		command := parseCommandMessage(m.Content)
 		fmt.Printf("received command %+v\n", command)
@@ -75,6 +77,39 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if err != nil {
 			log.Println(err)
 		}
+	}
+
+	// IF reply to the bot with "tldr", summarize the article in the referenced message
+	if m.MessageReference != nil && m.ReferencedMessage.Author.ID == s.State.User.ID && strings.ToLower(m.Content) == "tldr" {
+		SummarizeRepliedMessage(s, m)
+	}
+}
+
+func SummarizeRepliedMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
+	articleURL := m.ReferencedMessage.Embeds[0].URL
+	if articleURL == "" {
+		return
+	}
+
+	// SIgnal that bot is working on it
+	s.ChannelTyping(m.ChannelID)
+	// No need to defer this, as the typing indicator will stop when a message is sent
+
+	gemini, err := summarize.GetClient()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	summary, err := gemini.SummarizeWebpage(articleURL)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	_, err = s.ChannelMessageSend(m.ChannelID, summary)
+	if err != nil {
+		log.Println(err)
 	}
 }
 
