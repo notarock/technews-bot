@@ -8,7 +8,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/peterhellberg/hn v0.0.0-20200407070403-5537ecc08ef1
 	github.com/sirupsen/logrus v1.9.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.11.1
 	go.mongodb.org/mongo-driver v1.10.3
 )
 
