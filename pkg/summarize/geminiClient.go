@@ -55,7 +55,11 @@ func (gc *GeminiClient) SummarizeWebpage(URL string) (string, error) {
 func (gc *GeminiClient) summarizeFromHtml(htmlContent string) (string, error) {
 	ctx := context.Background()
 
-	prompt := fmt.Sprintf("Summarize the following content in a concise paragraph of 1500 characters or less:\n\n%s", htmlContent)
+	extractedText := extractTextFromHTML(htmlContent)
+
+	// Prepare the prompt for summarization
+
+	prompt := fmt.Sprintf("Summarize the following content in a concise paragraph of 1000 characters or less:\n\n%s", extractedText)
 
 	result, err := gc.client.Models.GenerateContent(
 		ctx,
