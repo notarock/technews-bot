@@ -12,7 +12,7 @@ require (
 	go.mongodb.org/mongo-driver v1.17.9
 	go.mongodb.org/mongo-driver/v2 v2.5.0
 	golang.org/x/net v0.51.0
-	google.golang.org/genai v1.48.0
+	google.golang.org/genai v1.49.0
 )
 
 require (
