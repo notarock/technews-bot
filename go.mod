@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/bwmarrin/discordgo v0.29.0
-	github.com/joho/godotenv v1.4.0
+	github.com/joho/godotenv v1.5.1
 	github.com/peterhellberg/hn v0.0.0-20200407070403-5537ecc08ef1
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
