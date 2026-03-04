@@ -11,7 +11,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.mongodb.org/mongo-driver v1.10.3
 	golang.org/x/net v0.47.0
-	google.golang.org/genai v1.40.0
+	google.golang.org/genai v1.48.0
 )
 
 require (
