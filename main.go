@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -23,7 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = database.Client.Ping(context.TODO(), nil)
+	err = database.Healthcheck()
 	if err != nil {
 		log.Fatal(err)
 	}

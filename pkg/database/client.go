@@ -46,3 +46,11 @@ func Connect(mongodbConfig MongodbConfig) (err error) {
 
 	return nil
 }
+
+func Healthcheck() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := collections.Guild.CountDocuments(ctx, nil)
+	return err
+}
