@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func listSubjects(s *discordgo.Session, m *discordgo.MessageCreate) discordgo.MessageEmbed {
-	guild, err := database.FindGuildByGuildID(m.GuildID)
+	guild, err := database.FindGuildByGuildID(context.Background(), m.GuildID)
 
 	if err != nil {
 		return discordgo.MessageEmbed{

@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -13,6 +14,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/notarock/technews-bot/pkg/articles"
 	"github.com/notarock/technews-bot/pkg/summarize"
+	"github.com/notarock/technews-bot/pkg/telemetry"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type DiscordConfig struct {
@@ -114,8 +118,24 @@ func SummarizeRepliedMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func (dc DiscordClient) SendArticle(a articles.Article, channel string) {
+	_, span := telemetry.Tracer.Start(context.Background(), "discord.SendArticle")
+	defer span.End()
+
+	span.SetAttributes(
+		attribute.String("article.id", a.ID),
+		attribute.String("article.title", a.Title),
+		attribute.String("channel.id", channel),
+	)
+
 	log.Printf("Attempting to send article named %+v\n", a)
 	embed := a.ToDiscordEmbed()
-	m, _ := dc.client.ChannelMessageSendEmbed(channel, embed)
+	m, err := dc.client.ChannelMessageSendEmbed(channel, embed)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "failed to send article")
+		log.Println(err)
+		return
+	}
+	span.SetAttributes(attribute.String("message.id", m.ID))
 	log.Println(m)
 }

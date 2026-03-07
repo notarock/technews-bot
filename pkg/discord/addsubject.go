@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -11,7 +12,7 @@ import (
 
 func addSubjectToChannel(s *discordgo.Session, m *discordgo.MessageCreate) discordgo.MessageEmbed {
 	subjectToAdd := strings.ReplaceAll(m.Content, "!technews add ", "")
-	guild, err := database.FindGuildByGuildID(m.GuildID)
+	guild, err := database.FindGuildByGuildID(context.Background(), m.GuildID)
 	if err != nil {
 		log.Errorf("error occured while trying to find guild by guildId: %v:", err)
 		return ErrorEmbed
@@ -24,7 +25,7 @@ func addSubjectToChannel(s *discordgo.Session, m *discordgo.MessageCreate) disco
 			return ErrorEmbed
 		}
 
-		guild, err = database.InsertGuild(database.NewGuild(discordGuild.ID, discordGuild.Name))
+		guild, err = database.InsertGuild(context.Background(), database.NewGuild(discordGuild.ID, discordGuild.Name))
 
 		if err != nil {
 			log.Errorf("error occured while trying to insert new guild in db: %v:", err)
@@ -33,7 +34,7 @@ func addSubjectToChannel(s *discordgo.Session, m *discordgo.MessageCreate) disco
 	}
 
 	guild.AddChannelSubject(m.ChannelID, subjectToAdd)
-	err = guild.Save()
+	err = guild.Save(context.Background())
 	if err != nil {
 		log.Errorf("error occured while trying to save subject in db: %v:", err)
 		return ErrorEmbed

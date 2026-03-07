@@ -15,6 +15,9 @@ import (
 	"github.com/notarock/technews-bot/pkg/discord"
 	"github.com/notarock/technews-bot/pkg/sources/hackernews"
 	"github.com/notarock/technews-bot/pkg/sources/lobsters"
+	"github.com/notarock/technews-bot/pkg/telemetry"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type BotConfig struct {
@@ -77,34 +80,45 @@ func (b Bot) Serve() {
 	fmt.Println("Received closing signal: exiting.")
 }
 
-func aggregateArticles() []articles.Article {
+func aggregateArticles(ctx context.Context) []articles.Article {
 	var aggregation []articles.Article
 
-	hnArticles := hackernews.FetchLatestTopStories()
+	ctx, span := telemetry.Tracer.Start(ctx, "aggregateArticles")
+	defer span.End()
+
+	hnArticles := hackernews.FetchLatestTopStories(ctx)
 	aggregation = append(aggregation, hnArticles...)
 
-	lbArticles := lobsters.FetchLatestArticles()
+	lbArticles := lobsters.FetchLatestArticles(ctx)
 	aggregation = append(aggregation, lbArticles...)
 
+	span.SetAttributes(attribute.Int("articles.count", len(aggregation)))
 	return aggregation
 }
 
 func (b Bot) filterAndSendArticles() {
+	ctx := context.Background()
+	ctx, span := telemetry.Tracer.Start(ctx, "filterAndSendArticles")
+	defer span.End()
+
 	if os.Getenv("DRY_RUN") == "true" {
 		log.Println("Dry run, do nothing")
 		return
 	}
 
-	guilds, err := database.GetAllGuilds()
+	guilds, err := database.GetAllGuilds(ctx)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "failed to get guilds")
 		log.Println(err)
 		return
 	}
 
-	aggregation := aggregateArticles()
+	aggregation := aggregateArticles(ctx)
+	span.SetAttributes(attribute.Int("aggregation.count", len(aggregation)))
 
 	for _, article := range aggregation {
-		dbArticle, err := database.FindArticleByLink(article.Link)
+		dbArticle, err := database.FindArticleByLink(ctx, article.Link)
 		if err != nil {
 			log.Printf("failed to fetch article in db: %v\n", err)
 			continue

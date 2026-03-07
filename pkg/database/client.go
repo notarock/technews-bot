@@ -30,7 +30,8 @@ func Connect(mongodbConfig MongodbConfig) (err error) {
 		return err
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	err = Client.Connect(ctx)
 	if err != nil {
 		return err

@@ -1,12 +1,16 @@
 package lobsters
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/notarock/technews-bot/pkg/articles"
+	"github.com/notarock/technews-bot/pkg/telemetry"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 const (
@@ -15,22 +19,30 @@ const (
 	SOURCE_NAME    = "LOBSTERS"
 )
 
-func FetchLatestArticles() []articles.Article {
+func FetchLatestArticles(ctx context.Context) []articles.Article {
 	var lobsterArticles []articles.Article
+
+	ctx, span := telemetry.Tracer.Start(ctx, "lobsters.FetchLatestArticles")
+	defer span.End()
 
 	res, err := http.Get(LOBSTER_URL)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "failed to fetch articles")
 		log.Fatalln(err)
 	}
+	defer res.Body.Close()
 
-	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "failed to parse HTML")
 		log.Fatal(err)
 	}
 
+	span.SetAttributes(attribute.Int("status.code", res.StatusCode))
+
 	doc.Find(".details").Each(func(i int, s *goquery.Selection) {
-		// For each item found, get the title, link, tags and author.
 		ul := s.Find(".u-url")
 		title := ul.Text()
 		link, _ := ul.Attr("href")
@@ -46,7 +58,7 @@ func FetchLatestArticles() []articles.Article {
 			href, exists := a.Attr("href")
 			if exists {
 				commentsLink = href
-				return false // break after first match
+				return false
 			}
 			return true
 		})
@@ -67,5 +79,6 @@ func FetchLatestArticles() []articles.Article {
 		lobsterArticles = append(lobsterArticles, article)
 	})
 
+	span.SetAttributes(attribute.Int("articles.fetched", len(lobsterArticles)))
 	return lobsterArticles
 }
