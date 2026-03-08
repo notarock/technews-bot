@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type MongoCollections struct {
@@ -25,14 +25,14 @@ type MongodbConfig struct {
 
 func Connect(mongodbConfig MongodbConfig) (err error) {
 	clientOptions := options.Client().ApplyURI(mongodbConfig.Uri)
-	Client, err = mongo.NewClient(clientOptions)
+	Client, err = mongo.Connect(clientOptions)
 	if err != nil {
 		return err
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	err = Client.Connect(ctx)
+	err = Client.Ping(ctx, nil)
 	if err != nil {
 		return err
 	}

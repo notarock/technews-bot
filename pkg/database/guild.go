@@ -6,10 +6,9 @@ import (
 	"time"
 
 	"github.com/notarock/technews-bot/pkg/telemetry"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 )
@@ -103,7 +102,7 @@ func (g Guild) Save(ctx context.Context) error {
 	ctx, span := telemetry.Tracer.Start(ctx, "database.Guild.Save")
 	defer span.End()
 
-	objectID, err := primitive.ObjectIDFromHex(g.ID)
+	objectID, err := bson.ObjectIDFromHex(g.ID)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "invalid object ID")
