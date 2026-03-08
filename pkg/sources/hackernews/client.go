@@ -28,7 +28,7 @@ func FetchLatestTopStories(ctx context.Context) []articles.Article {
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "failed to fetch top stories")
-		panic(err)
+		return articleList
 	}
 
 	span.SetAttributes(attribute.Int("stories.count", len(ids)))
@@ -37,7 +37,8 @@ func FetchLatestTopStories(ctx context.Context) []articles.Article {
 		item, err := client.Item(id)
 		if err != nil {
 			span.RecordError(err)
-			panic(err)
+			span.SetStatus(codes.Error, "failed to fetch item")
+			continue
 		}
 
 		if item.URL == "" {
