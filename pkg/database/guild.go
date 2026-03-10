@@ -16,7 +16,7 @@ import (
 const GUILD_COLLECTION = "discord_guilds"
 
 type Guild struct {
-	ID              string            `json:"id,omitempty" bson:"_id,omitempty"`
+	ID              bson.ObjectID     `json:"id,omitempty" bson:"_id,omitempty"`
 	GuildID         string            `json:"guildId,omitempty" bson:"guildId,omitempty"`
 	Name            string            `json:"name" bson:"name,omitempty"`
 	Settings        Settings          `json:"Settings" bson:"Settings,omitempty"`
@@ -64,13 +64,18 @@ func InsertGuild(ctx context.Context, g Guild) (Guild, error) {
 	ctx, span := telemetry.Tracer.Start(ctx, "database.InsertGuild")
 	defer span.End()
 
-	guild, err := collections.Guild.InsertOne(ctx, g)
-	g.ID = guild.InsertedID.(string)
+	result, err := collections.Guild.InsertOne(ctx, g)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "failed to insert guild")
+		return g, err
 	}
-	return g, err
+
+	if insertedID, ok := result.InsertedID.(bson.ObjectID); ok {
+		g.ID = insertedID
+	}
+
+	return g, nil
 }
 
 func GetAllGuilds(ctx context.Context) (guilds []Guild, err error) {
@@ -102,14 +107,14 @@ func (g Guild) Save(ctx context.Context) error {
 	ctx, span := telemetry.Tracer.Start(ctx, "database.Guild.Save")
 	defer span.End()
 
-	objectID, err := bson.ObjectIDFromHex(g.ID)
-	if err != nil {
+	if g.ID.IsZero() {
+		err := fmt.Errorf("guild ID is not set")
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "invalid object ID")
 		return err
 	}
 
-	filter := bson.M{"_id": objectID}
+	filter := bson.M{"_id": g.ID}
 	update := bson.M{"$set": bson.M{
 		"guildId":         g.GuildID,
 		"name":            g.Name,

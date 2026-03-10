@@ -124,7 +124,7 @@ func (b Bot) filterAndSendArticles() {
 			continue
 		}
 
-		if dbArticle.ID != "" { // Article already sent
+		if !dbArticle.ID.IsZero() { // Article already sent
 			if os.Getenv("DEBUG") == "true" {
 				log.Printf("Article already sent: %s\n", article.Link)
 			}

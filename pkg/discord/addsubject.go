@@ -18,7 +18,7 @@ func addSubjectToChannel(s *discordgo.Session, m *discordgo.MessageCreate) disco
 		return ErrorEmbed
 	}
 
-	if guild.ID == "" { // Guild not found
+	if guild.ID.IsZero() { // Guild not found
 		discordGuild, err := s.Guild(m.GuildID)
 		if err != nil {
 			log.Errorf("error occured while trying to find discord guild: %v:", err)

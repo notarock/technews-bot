@@ -12,10 +12,10 @@ import (
 const ARTICLE_COLLECTION = "articles_cache"
 
 type Article struct {
-	ID        string `json:"id,omitempty" bson:"_id,omitempty"`
-	ArticleID string `json:"article_id,omitempty" bson:"article_id,omitempty"`
-	Link      string `json:"link,omitempty" bson:"link,omitempty"`
-	ChangedAt int64  `json:"changed_at" bson:"changed_at"`
+	ID        bson.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	ArticleID string        `json:"article_id,omitempty" bson:"article_id,omitempty"`
+	Link      string        `json:"link,omitempty" bson:"link,omitempty"`
+	ChangedAt int64         `json:"changed_at" bson:"changed_at"`
 }
 
 func InsertArticle(ctx context.Context, article Article) error {
