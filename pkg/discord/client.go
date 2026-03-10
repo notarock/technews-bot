@@ -137,5 +137,5 @@ func (dc DiscordClient) SendArticle(a articles.Article, channel string) {
 		return
 	}
 	span.SetAttributes(attribute.String("message.id", m.ID))
-	log.Println(m)
+	log.Printf("Sent article %q to channel %s (message %s)\n", a.Title, channel, m.ID)
 }
