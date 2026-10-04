@@ -23,11 +23,12 @@ DISCORD_TOKEN=<Your token here>
 DISCORD_CHANNEL=<Your text channel id here>
 ```
 
+Set `GEMINI_MODEL` to choose the model used for article summaries. It defaults
+to `gemini-2.5-flash` when unset or empty.
+
 ## Project vision
 
--   This project is not configurable as of right now, aside from the discord token
-    and channel id, but will aim to be fully configurable via text commands in the
-    future.
+-   The project aims to support configuration via text commands in the future.
 -   I'm not sure if this bot should only support Discord for now. It would be
     interresting to add support for many chat services such as Slack or Matrix.
 

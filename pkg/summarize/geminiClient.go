@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"google.golang.org/genai"
 )
@@ -63,7 +64,7 @@ func (gc *GeminiClient) summarizeFromHtml(htmlContent string) (string, error) {
 
 	result, err := gc.client.Models.GenerateContent(
 		ctx,
-		"gemini-2.5-flash",
+		modelName(),
 		genai.Text(prompt),
 		nil,
 	)
@@ -73,4 +74,11 @@ func (gc *GeminiClient) summarizeFromHtml(htmlContent string) (string, error) {
 	}
 
 	return result.Text(), nil
+}
+
+func modelName() string {
+	if model := os.Getenv("GEMINI_MODEL"); model != "" {
+		return model
+	}
+	return "gemini-2.5-flash"
 }
